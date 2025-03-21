@@ -1,0 +1,11 @@
+build
+.cache
+.vscode
+build.clang
+managed_components
+
+/components
+/output
+/uiflow_nvs_config_test.bin
+
+sdkconfig.old

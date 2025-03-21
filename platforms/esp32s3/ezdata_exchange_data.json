@@ -1,0 +1,24 @@
+{
+    "input": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+    ],
+    "relay": [
+        false,
+        false,
+        false,
+        false
+    ],
+    "statusLight": "#000000",
+    "powerVoltage": 4.4725,
+    "extCurrent": 0,
+    "deviceTemp": 30.75,
+    "sdCard": false,
+    "lastModifiedBy": "stamplc"
+}
