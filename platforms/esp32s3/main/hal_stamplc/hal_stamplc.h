@@ -86,6 +86,8 @@ public:
     void startWifiConfigApServer(std::function<void(const std::string&)> onEvent) override;
     std::string getEzdataStatusUrl() override;
     bool clearEzdataMonitoringUser() override;
+    bool isEadataTokenValid() override;
+    std::string getWifiCurrentStatus() override;
 
 private:
     void _watch_dog_init();

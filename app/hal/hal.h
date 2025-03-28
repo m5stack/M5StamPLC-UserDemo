@@ -675,6 +675,24 @@ public:
         return false;
     }
 
+    static bool IsEadataTokenValid()
+    {
+        return Get()->isEadataTokenValid();
+    }
+    virtual bool isEadataTokenValid()
+    {
+        return false;
+    }
+
+    static std::string GetWifiCurrentStatus()
+    {
+        return Get()->getWifiCurrentStatus();
+    }
+    virtual std::string getWifiCurrentStatus()
+    {
+        return "";
+    }
+
     /**
      * @brief Components
      *

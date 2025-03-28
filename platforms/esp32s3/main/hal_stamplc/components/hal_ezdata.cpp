@@ -17,9 +17,10 @@
 
 class EzdataDaemonControl_t : public DaemonControl_t {
 public:
-    bool is_register_ok      = false;
-    bool is_wifi_connected   = false;
-    bool is_ezdata_connected = false;
+    bool is_register_ok             = false;
+    bool is_wifi_connected          = false;
+    bool is_ezdata_connected        = false;
+    std::string current_wifi_status = "not config";
 };
 static EzdataDaemonControl_t* _daemon_control = nullptr;
 static std::string _ezdata_mqtt_token;
@@ -38,6 +39,10 @@ static bool _connect_wifi()
     spdlog::info("[wifi] ssid: {}", HAL::GetSystemConfig().wifiSsid);
     spdlog::info("[wifi] pass: {}", HAL::GetSystemConfig().wifiPassword);
     WiFi.begin(HAL::GetSystemConfig().wifiSsid.c_str(), HAL::GetSystemConfig().wifiPassword.c_str());
+
+    _daemon_control->Borrow();
+    _daemon_control->current_wifi_status = "connecting";
+    _daemon_control->Return();
 
     // Wait for the WiFi event
     uint32_t log_count = 0;
@@ -60,7 +65,8 @@ static bool _connect_wifi()
     }
 
     _daemon_control->Borrow();
-    _daemon_control->is_wifi_connected = ret;
+    _daemon_control->is_wifi_connected   = ret;
+    _daemon_control->current_wifi_status = ret ? "connected" : "disconnected";
     _daemon_control->Return();
 
     return ret;
@@ -401,13 +407,14 @@ void HAL_StamPLC::ezdata_init()
 {
     spdlog::info("ezdata init");
 
+    _ntp_time_zone  = _data.config.ntpTimeZone;
+    _daemon_control = new EzdataDaemonControl_t;
+
     if (_data.config.wifiSsid.empty()) {
         spdlog::warn("empty wifi config, return");
         return;
     }
 
-    _ntp_time_zone  = _data.config.ntpTimeZone;
-    _daemon_control = new EzdataDaemonControl_t;
     xTaskCreate(_ezdata_daemon, "ezdata", 4096, NULL, 15, NULL);
 }
 
@@ -435,9 +442,32 @@ bool HAL_StamPLC::isEzdataConnected()
     return ret;
 }
 
+std::string HAL_StamPLC::getWifiCurrentStatus()
+{
+    std::string ret = "not config";
+    if (_daemon_control == nullptr) {
+        return ret;
+    }
+    _daemon_control->Borrow();
+    ret = _daemon_control->current_wifi_status;
+    _daemon_control->Return();
+    return ret;
+}
+
 std::string HAL_StamPLC::getEzdataStatusUrl()
 {
     return fmt::format("https://ezdata-stamplc.m5stack.com/{}", _ezdata_mqtt_token);
+}
+
+bool HAL_StamPLC::isEadataTokenValid()
+{
+    spdlog::info("[ezdata] check ezdata token valid");
+    spdlog::info("[ezdata] token: {}", _ezdata_mqtt_token);
+    if (_ezdata_mqtt_token.empty()) {
+        spdlog::error("[ezdata] empty token");
+        return false;
+    }
+    return true;
 }
 
 bool HAL_StamPLC::clearEzdataMonitoringUser()

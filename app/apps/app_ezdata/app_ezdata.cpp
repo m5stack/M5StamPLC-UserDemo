@@ -110,6 +110,16 @@ void AppEzdata::handle_status()
         return;
     }
 
+    if (!HAL::IsEzdataConnected()) {
+        HAL::PopWarning("Ezdata is disconnected");
+        return;
+    }
+
+    if (!HAL::IsEadataTokenValid()) {
+        HAL::PopWarning("Ezdata token is invalid");
+        return;
+    }
+
     // Display status url code
     HAL::GetCanvas()->fillScreen(_theme_color);
     {
@@ -154,7 +164,7 @@ void AppEzdata::handle_info()
             HAL::GetCanvas()->setTextColor((uint32_t)0x4C498A);
             HAL::GetCanvas()->setTextDatum(middle_right);
             HAL::GetCanvas()->drawString(HAL::IsEzdataConnected() ? "Connected" : "Disconnected", 222, 17);
-            HAL::GetCanvas()->drawString(HAL::IsWifiConnected() ? "Connected" : "Disconnected", 222, 50);
+            HAL::GetCanvas()->drawString(HAL::GetWifiCurrentStatus().c_str(), 222, 50);
             if (HAL::GetSystemConfig().wifiSsid.empty()) {
                 HAL::GetCanvas()->drawString("WiFi Not Config!", 222, 85);
             } else {

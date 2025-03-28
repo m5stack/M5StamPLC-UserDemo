@@ -46,6 +46,12 @@ std::vector<std::string> _get_wifi_list()
 {
     std::vector<std::string> wifi_list;
 
+    // W (39415) wifi:sta_scan: STA is connecting, scan are not allowed!
+    if (HAL::GetWifiCurrentStatus() == "connecting") {
+        spdlog::error("wifi is connecting, scan are not allowed!");
+        return wifi_list;
+    }
+
     // Scan
     spdlog::info("start scan");
     int wifi_num = WiFi.scanNetworks();
